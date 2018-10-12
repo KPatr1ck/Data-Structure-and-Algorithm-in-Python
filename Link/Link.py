@@ -3,9 +3,11 @@
 
 
 class Node:
-    def __init__(self, data=0, node=None):
+    def __init__(self, data=0, p_node=None, n_node=None):
         self.data = data
-        self.p_next = node
+        # p_prev可用于双向的链表
+        self.p_prev = p_node
+        self.p_next = n_node
 
     def __repr__(self):
         return str(self.data)
@@ -62,6 +64,21 @@ class Link:
             p = p.p_next
         return None
 
+    def cat(self, link):
+        if self.is_empty():
+            p = self.head
+        else:
+            p = self.get_last_node()
+        p.p_next = link.get_first_node()
+        self.length += link.length
+
+    # 兼容头部没有哨兵的链表
+    def cat_with_node(self, node):
+        p = node
+        while p:
+            self.append(p.data)
+            p = p.p_next
+
     def is_empty(self):
         return self.length == 0
 
@@ -80,7 +97,27 @@ class Link:
             raise IndexError('Link has no nodes')
         return self.head.p_next
 
+    def get_next_node(self, node):
+        if self.is_empty():
+            raise IndexError('Link has no nodes')
+        
+        p = self.get_first_node()
+        while p:
+            if p == node:
+                return p.p_next
+            p = p.p_next
+
+        raise Exception("can't find this node({}) in link({})".format(id(node), id(self.head)))
+
+    def get_last_node(self):
+        if self.is_empty():
+            raise IndexError('Link has no nodes')
+        return self.index(self.length - 1)
+
+
     def __repr__(self):
+        if self.is_empty():
+            return str(None)
         pr_data = []
         p = self.get_first_node()
         while p:
