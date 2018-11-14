@@ -95,7 +95,7 @@ class BinarySearchTree(Tree):
 if __name__ == '__main__':
     #         7
     #      5      8
-    #    4   6  N   8
+    #    4   6  N   9
     #  3
     #  
     bst = BinarySearchTree()
