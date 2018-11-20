@@ -173,10 +173,9 @@ class Tree234:
 
         return None
 
-    @staticmethod
-    def _bfs(node):
+    def _bfs(self):
         q = Queue()
-        q.put(node)
+        q.put(self.root)
 
         ret = []
         while not q.empty():
@@ -189,7 +188,7 @@ class Tree234:
         return ret
 
     def __repr__(self):
-        return str(self._bfs(self.root))
+        return str(self._bfs())
 
 
 if __name__ == '__main__':
@@ -215,7 +214,6 @@ if __name__ == '__main__':
 
     print('-' * 50)
 
-    import random
     t2 = Tree234()
     nums_set = list(range(1, 11))
     for n in nums_set:
