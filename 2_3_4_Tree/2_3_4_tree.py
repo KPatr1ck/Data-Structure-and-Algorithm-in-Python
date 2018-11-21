@@ -2,6 +2,9 @@
 # -*- coding: UTF-8 -*-
  
 from queue import Queue
+import pygraphviz as pgv
+
+OUTPUT_PATH = 'E:/'
 
 
 class TreeNode:
@@ -187,6 +190,35 @@ class Tree234:
 
         return ret
 
+    def draw_img(self, img_name='2_3_4_Tree.png'):
+        """
+        画出树图
+        1. windows下安装graphviz:
+            https://graphviz.gitlab.io/_pages/Download/Download_windows.html
+        2. python环境中安装pygraphviz模块:
+            https://www.lfd.uci.edu/~gohlke/pythonlibs/
+        :param img_name:
+        :return:
+        """
+        tree = pgv.AGraph(directed=True, strict=True)
+
+        q = Queue()
+        q.put(self.root)
+
+        tree.add_node(self.root.values)
+        while not q.empty():
+            n = q.get()
+            if n is not None:
+                for c in n.children:
+                    q.put(c)
+                    if c is not None:
+                        tree.add_edge(n.values, c.values)
+
+        tree.graph_attr['epsilon'] = '0.01'
+        tree.layout('dot')
+        tree.draw(OUTPUT_PATH + img_name)
+        return True
+
     def __repr__(self):
         return str(self._bfs())
 
@@ -211,6 +243,7 @@ if __name__ == '__main__':
     n4.children[1] = n5
     n5.parent = n4
     print(t1)
+    t1.draw_img('t1.png')
 
     print('-' * 50)
 
@@ -219,3 +252,4 @@ if __name__ == '__main__':
     for n in nums_set:
         t2.insert(n)
     print(t2)
+    t2.draw_img('t2.png')
