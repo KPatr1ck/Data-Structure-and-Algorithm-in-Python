@@ -15,17 +15,11 @@ def cell_num(n):
     while n > 0:
         # 存活时间剩1,2,3小时的细胞
         cell_0, cell_1, cell_2 = cell_list[:]
-        # 3->2,3
-        cell_list[1] += cell_2
 
-        # 2->1,3
-        cell_list[1] -= cell_1
-        cell_list[0] += cell_1
-        cell_list[2] += cell_1
-
-        # 1->0,3
-        cell_list[0] -= cell_0
-        cell_list[2] += cell_0
+        # 3->2,3, 2->1,3, 1->0,3
+        cell_list[2] += cell_0 + cell_1 + cell_2 - cell_2
+        cell_list[1] += cell_2 - cell_1
+        cell_list[0] += cell_1 - cell_0
 
         n -= 1
 
@@ -36,7 +30,7 @@ def cell_num_recursive(n):
     """
     递归解法
     f(n) = 2*f(n-1) - f(n-4)
-    第n时刻的细胞数目，等于 *** n-1时刻的细胞数*2 - 在n时刻恰好死的数目(n-1存活，n死) ***
+    第n时刻的细胞数目，等于 *** n-1时刻的细胞数*2 - 在n时刻恰好死的数目 ***
     :param n:
     :return:
     """
@@ -48,11 +42,9 @@ def cell_num_recursive(n):
 
 
 if __name__ == '__main__':
-    n = 25
-    for n in range(1, 10):
-        print('cell_num: {}'.format(cell_num(n)))
-        print('cell_num_recursive: {}'.format(cell_num_recursive(n)))
-        print('-'*20)
+    n = 50
+    print(cell_num(n))
+    print(cell_num_recursive(n))
 
 
 
