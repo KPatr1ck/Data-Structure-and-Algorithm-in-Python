@@ -43,8 +43,8 @@ def cell_num_recursive(n):
     base_res = {0: 1, 1: 2, 2: 4, 3: 7}
     if n in base_res:
         return base_res[n]
-
-    return 2*cell_num_recursive(n-1) - cell_num_recursive(n-4)
+    else:
+        return 2*cell_num_recursive(n-1) - cell_num_recursive(n-4)
 
 
 if __name__ == '__main__':
