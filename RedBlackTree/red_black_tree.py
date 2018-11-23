@@ -5,7 +5,7 @@ from queue import Queue
 import pygraphviz as pgv
 import random
 
-OUTPUT_PATH = 'C:/Users/gz1301/'
+OUTPUT_PATH = 'E:/'
 
 
 class TreeNode:
@@ -116,21 +116,37 @@ class RedBlackTree:
             return
 
         # 调整节点的父节点p是红色的，叔叔节点u是黑色
+        # 注意父节点左右子树需要分别处理，具有对称性
         if u.is_black():
-            # case 2：
-            if p.right == node:
-                # print('in case 222222')
-                self.rotate_l(p)
-                # self.draw_img('rbt_case2.png')
-                self._adjust_after_insert(p)
-                return
-            # case 3：
-            else:
-                # print('in case 333333')
-                self.rotate_r(g)
-                p.switch_color()
-                g.switch_color()
-                # self.draw_img('rbt_case3.png')
+            # 父节点是左子树
+            if p == g.left:
+                # case 2：父节点是左子树
+                if p.right == node:
+                    self.rotate_l(p)
+                    self._adjust_after_insert(p)
+                    return
+                # case 3：
+                else:
+                    self.rotate_r(g)
+                    p.switch_color()
+                    g.switch_color()
+                    return
+
+            # 父节点是右子树
+            if p == g.right:
+                # case 2：
+                if p.left == node:
+                    self.rotate_r(p)
+                    self.draw_img('rbt_case2.png')
+                    self._adjust_after_insert(p)
+                    return
+                # case 3：
+                else:
+                    self.rotate_l(g)
+                    p.switch_color()
+                    g.switch_color()
+                    self.draw_img('rbt_case3.png')
+                    return
 
     def rotate_l(self, node):
         if node is None:
@@ -144,16 +160,18 @@ class RedBlackTree:
         x = node
         y = node.right
 
-        # node为根节点时，p为None
+        # node为根节点时，p为None，旋转后要更新根节点指向
         if p is not None:
             if x == p.left:
                 p.left = y
             else:
                 p.right = y
+        else:
+            self.root = y
 
         x.parent, y.parent = y, p
 
-        if y.left is not None:
+        if y.left != self.black_leaf:
             y.left.parent = x
 
         x.right, y.left = y.left, x
@@ -176,6 +194,8 @@ class RedBlackTree:
                 p.left = y
             else:
                 p.right = y
+        else:
+            self.root = y
 
         x.parent, y.parent = y, p
 
@@ -238,13 +258,13 @@ class RedBlackTree:
 
 if __name__ == '__main__':
     # nums = [5, 3, 6, 7, 8]
-    nums = list(range(1, 6))
-    # nums = []
-    # while len(nums) < 20:
-    #     n = random.randint(1, 100)
-    #     if n in nums:
-    #         continue
-    #     nums.append(n)
+    # nums = list(range(1, 6))
+    nums = []
+    while len(nums) < 20:
+        n = random.randint(1, 100)
+        if n in nums:
+            continue
+        nums.append(n)
 
     rbt = RedBlackTree(nums)
     rbt.draw_img('rbt.png')
