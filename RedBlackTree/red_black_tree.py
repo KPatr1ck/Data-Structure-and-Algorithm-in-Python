@@ -29,7 +29,6 @@ class TreeNode:
 class RedBlackTree:
     """
     红黑树实现
-    参考文章：https://segmentfault.com/a/1190000012728513
     """
     def __init__(self, val_list=None):
         self.root = None
@@ -90,63 +89,69 @@ class RedBlackTree:
         self._adjust_after_insert(new_node)
 
     def _adjust_after_insert(self, node):
+        """
+        插入后的节点调整
+        调整的情况如下：
+        0. 两种特殊情况：n为根节点时，直接将颜色置黑；父节点p为黑色时，不需要额外调整
+        1. 调整节点的父节点p是红色的，叔节点u也是红色
+        2. 调整节点的父节点p是红色的，叔节点u是黑色，父节点p和调整节点n不在同一方向
+        3. 调整节点的父节点p是红色的，叔节点u是黑色，父节点p和调整节点n在同一方向
+        :param node:
+        :return:
+        """
         # 父p 叔u 祖父g
         p = self.parent(node)
         u = self.bro(p)
         g = self.parent(p)
 
-        # 调整节点为根节点
+        # case 0: 调整节点为根节点
         if node == self.root:
             self.root.color = 'black'
             return
 
-        # 调整节点的父节点p是黑色的，不需要额外调整
+        # case 0: 调整节点的父节点p是黑色的
         if p.is_black():
             return
 
-        print('adjust after insert, node:{}'.format(str(node.val)))
-        # case 1：调整节点的父节点p是红色的，叔叔节点u也是红色
+        # case 1: 调整节点的父节点p是红色的，叔叔节点u也是红色
         if not u.is_black():
-            # print('in case 1111111')
             p.switch_color()
             u.switch_color()
             g.switch_color()  # p和u是红色，g一定是黑色的
-            # self.draw_img('rbt_case1.png')
             self._adjust_after_insert(g)
             return
 
         # 调整节点的父节点p是红色的，叔叔节点u是黑色
         # 注意父节点左右子树需要分别处理，具有对称性
+        # case2:
         if u.is_black():
             # 父节点是左子树
-            if p == g.left:
-                # case 2：父节点是左子树
-                if p.right == node:
-                    self.rotate_l(p)
-                    self._adjust_after_insert(p)
-                    return
-                # case 3：
-                else:
-                    self.rotate_r(g)
-                    p.switch_color()
-                    g.switch_color()
-                    return
+            if p == g.left and p.right == node:
+                self.rotate_l(p)
+                self._adjust_after_insert(p)
+                return
 
             # 父节点是右子树
-            if p == g.right:
-                # case 2：
-                if p.left == node:
-                    self.rotate_r(p)
-                    self.draw_img('rbt_case2.png')
-                    self._adjust_after_insert(p)
-                    return
-                # case 3：
-                else:
-                    self.rotate_l(g)
-                    p.switch_color()
-                    g.switch_color()
-                    self.draw_img('rbt_case3.png')
-                    return
+            if p == g.right and p.left == node:
+                self.rotate_r(p)
+                self._adjust_after_insert(p)
+                return
+
+        # case 3:
+        if u.is_black():
+            # 父节点是左子树
+            if p == g.left and p.left == node:
+                self.rotate_r(g)
+                p.switch_color()
+                g.switch_color()
+                return
+
+            # 父节点是右子树
+            if p == g.right and p.right == node:
+                self.rotate_l(g)
+                p.switch_color()
+                g.switch_color()
+                return
 
     def rotate_l(self, node):
         if node is None:
@@ -260,8 +265,8 @@ if __name__ == '__main__':
     # nums = [5, 3, 6, 7, 8]
     # nums = list(range(1, 6))
     nums = []
-    while len(nums) < 20:
-        n = random.randint(1, 100)
+    while len(nums) < 50:
+        n = random.randint(1, 200)
         if n in nums:
             continue
         nums.append(n)
