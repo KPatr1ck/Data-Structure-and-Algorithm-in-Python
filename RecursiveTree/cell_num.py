@@ -6,7 +6,6 @@ def cell_num(n):
     """
     1个细胞的生命周期是3小时，1小时分裂一次。求n小时后，容器内有多少细胞？
     :param n: n小时
-    :param cell_list: 不同寿命对应的细胞树
     :return:
     """
     assert(n >= 0)
