@@ -21,31 +21,47 @@ class TreeNode:
     def is_black(self):
         return self.color == 'black'
 
-    def switch_color(self):
-        self.color = 'red' if self.color == 'black' else 'black'
+    def set_black(self):
+        self.color = 'black'
         return
+
+    def set_red(self):
+        self.color = 'red'
 
 
 class RedBlackTree:
     """
     红黑树实现
+    参考资料：
+    1. 《算法导论》
+    第13章 红黑树
+    13.3 插入 p178
+    13.4 删除 p183
+
+    2. 红黑树（二）：删除
+    https://zhuanlan.zhihu.com/p/25402654
     """
     def __init__(self, val_list=None):
         self.root = None
         self.black_leaf = TreeNode(color='b')  # 共用的黑色叶子节点
 
-        # 测试用
+        # 可用数组初始化
         if type(val_list) is list:
             for n in val_list:
                 assert type(n) is int
                 self.insert(n)
 
     def search(self, val):
+        """
+        搜索
+        :param val:
+        :return:
+        """
         if self.root is None:
             return None
 
         n = self.root
-        while n:
+        while n != self.black_leaf:
             if val < n.val:
                 n = n.left
             elif val > n.val:
@@ -86,74 +102,195 @@ class RedBlackTree:
 
         new_node.left = new_node.right = self.black_leaf
         # 插入后调整
-        self._adjust_after_insert(new_node)
+        self._insert_fixup(new_node)
 
-    def _adjust_after_insert(self, node):
+    def _insert_fixup(self, node):
         """
-        插入后的节点调整
-        调整的情况如下：
-        0. 两种特殊情况：n为根节点时，直接将颜色置黑；父节点p为黑色时，不需要额外调整
-        1. 调整节点的父节点p是红色的，叔节点u也是红色
-        2. 调整节点的父节点p是红色的，叔节点u是黑色，父节点p和调整节点n不在同一方向
-        3. 调整节点的父节点p是红色的，叔节点u是黑色，父节点p和调整节点n在同一方向
+        插入调整
+        参考资料：《算法导论》 13.3 p178-179
         :param node:
         :return:
         """
-        # 父p 叔u 祖父g
-        p = self.parent(node)
-        u = self.bro(p)
-        g = self.parent(p)
+        n = node
+        while n is not self.root and not n.parent.is_black():
+            # 父p 叔u 祖父g
+            p = self.parent(n)
+            u = self.bro(p)
+            g = self.parent(p)
 
-        # case 0: 调整节点为根节点
-        if node == self.root:
-            self.root.color = 'black'
+            if not u.is_black():        # case 1
+                p.set_black()           # case 1
+                u.set_black()           # case 1
+                g.set_red()             # case 1
+                n = g                   # case 1
+                continue
+
+            if p == g.left:     # p为左结点
+                if n == p.right:        # case 2
+                    self.rotate_l(p)    # case 2
+                    n, p = p, n         # case 2
+                p.set_black()           # case 3
+                g.set_red()             # case 3
+                self.rotate_r(g)        # case 3
+            else:               # p为右节点
+                if n == p.left:         # case 2
+                    self.rotate_r(p)    # case 2
+                    n, p = p, n         # case 2
+                p.set_black()           # case 3
+                g.set_red()             # case 3
+                self.rotate_l(g)        # case 3
+
+        # 根节点强制置黑，有两种情况根节点是红色：
+        # 1. 新插入时是红色
+        # 2. 经过case 1调整过后变红色
+        self.root.color = 'black'
+
+    def delete(self, val):
+        """
+        删除
+        :param val:
+        :return:
+        """
+        assert type(val) is int
+
+        n = self.search(val)
+        if n is None:
+            print('can not find any nodes with value: {}'.format(val))
             return
 
-        # case 0: 调整节点的父节点p是黑色的
-        if p.is_black():
-            return
+        self._delete_node(n)
 
-        # case 1: 调整节点的父节点p是红色的，叔叔节点u也是红色
-        if not u.is_black():
-            p.switch_color()
-            u.switch_color()
-            g.switch_color()  # p和u是红色，g一定是黑色的
-            self._adjust_after_insert(g)
-            return
+    def _delete_node(self, node):
+        """
+        删除节点内部实现
+        参考资料：《算法导论》 13.4 p183-184
+        实现方式有微调，当n有2个子节点时，将s拷贝至n，转为删除s(s最多有一个子节点)
+        :param node:
+        :return:
+        """
+        n = node
 
-        # 调整节点的父节点p是红色的，叔叔节点u是黑色
-        # 注意父节点左右子树需要分别处理，具有对称性
-        # case2:
-        if u.is_black():
-            # 父节点是左子树
-            if p == g.left and p.right == node:
-                self.rotate_l(p)
-                self._adjust_after_insert(p)
-                return
+        # n的子节点个数等于2
+        if self.children_count(n) == 2:
+            # 寻找n的后继s
+            s = n.right
+            while s.left != self.black_leaf:
+                s = s.left
+            n.val = s.val
+            # 将删除n转化为删除s
+            n = s
 
-            # 父节点是右子树
-            if p == g.right and p.left == node:
-                self.rotate_r(p)
-                self._adjust_after_insert(p)
-                return
+        # n的子节点个数小于2
+        if n.left == self.black_leaf:
+            c = n.right
+        else:
+            c = n.left
+        self._transplant(n, c)
 
-        # case 3:
-        if u.is_black():
-            # 父节点是左子树
-            if p == g.left and p.left == node:
-                self.rotate_r(g)
-                p.switch_color()
-                g.switch_color()
-                return
+        # 删除的节点是黑色，需要调整
+        if n.is_black():
+            self._delete_fixup(c)
+        return
 
-            # 父节点是右子树
-            if p == g.right and p.right == node:
-                self.rotate_l(g)
-                p.switch_color()
-                g.switch_color()
-                return
+    def _delete_fixup(self, node):
+        """
+        删除调整
+        参考资料：《算法导论》 13.4 p185-187
+        :param node:
+        :return:
+        """
+        n = node
+        while n != self.root and n.is_black():
+            p = self.parent(n)
+            b = self.bro(n)
+
+            # 左右节点对称
+            if p.left == n:
+                if not b.is_black():
+                    b.set_black()                   # case 1
+                    p.set_red()                     # case 1
+                    self.rotate_l(p)                # case 1
+                    # new bro after rotate
+                    b = self.bro(n)                 # case 1
+
+                if b.left.is_black() and b.right.is_black():
+                    b.set_red()                     # case 2
+                    n = p                           # case 2
+                else:
+                    if b.right.is_black():
+                        b.left.set_black()          # case 3
+                        b.set_red()                 # case 3
+                        self.rotate_r(b)            # case 3
+                        # new bro after rotate
+                        b = self.bro(n)             # case 3
+
+                    # 注意，因为p可能是红或黑，所以不能直接赋值颜色，只能copy
+                    b.color = p.color               # case 4
+                    p.set_black()                   # case 4
+                    b.right.set_black()             # case 4
+                    self.rotate_l(p)                # case 4
+                    # trick, 调整结束跳出while
+                    n = self.root                   # case 4
+            else:
+                if not b.is_black():
+                    b.set_black()                   # case 1
+                    p.set_red()                     # case 1
+                    self.rotate_r(p)                # case 1
+                    # new bro after rotate
+                    b = self.bro(n)                 # case 1
+
+                if b.left.is_black() and b.right.is_black():
+                    b.set_red()                     # case 2
+                    n = p                           # case 2
+                else:
+                    if b.left.is_black():
+                        b.right.set_black()         # case 3
+                        b.set_red()                 # case 3
+                        self.rotate_l(b)            # case 3
+                        # new bro after rotate
+                        b = self.bro(n)             # case 3
+
+                    # 注意，因为p可能是红或黑，所以不能直接赋值颜色，只能copy
+                    b.color = p.color               # case 4
+                    p.set_black()                   # case 4
+                    b.left.set_black()             # case 4
+                    self.rotate_r(p)                # case 4
+                    # trick, 调整结束跳出while
+                    n = self.root                   # case 4
+
+        # 将n设为黑色，从上面while循环跳出，情况有两种
+        # 1. n是根节点，直接无视附加的黑色
+        # 2. n是红色的节点，则染黑
+        n.set_black()
+
+    def _transplant(self, n1, n2):
+        """
+        节点移植， n2 -> n1
+        :param n1: 原节点
+        :param n2: 移植节点
+        :return:
+        """
+        if n1 == self.root:
+            if n2 != self.black_leaf:
+                self.root = n2
+                n2.parent = None
+            else:
+                self.root = None    # 只有删除根节点时会进来
+        else:
+            p = self.parent(n1)
+            if p.left == n1:
+                p.left = n2
+            else:
+                p.right = n2
+
+            n2.parent = p
 
     def rotate_l(self, node):
+        """
+        左旋
+        :param node:
+        :return:
+        """
         if node is None:
             return
 
@@ -182,6 +319,11 @@ class RedBlackTree:
         x.right, y.left = y.left, x
 
     def rotate_r(self, node):
+        """
+        右旋
+        :param node:
+        :return:
+        """
         if node is None:
             return
 
@@ -211,6 +353,11 @@ class RedBlackTree:
 
     @staticmethod
     def bro(node):
+        """
+        获取兄弟节点
+        :param node:
+        :return:
+        """
         if node is None or node.parent is None:
             return None
         else:
@@ -222,17 +369,35 @@ class RedBlackTree:
 
     @staticmethod
     def parent(node):
+        """
+        获取父节点
+        :param node:
+        :return:
+        """
         if node is None:
             return None
         else:
             return node.parent
 
+    def children_count(self, node):
+        """
+        获取子节点个数
+        :param node:
+        :return:
+        """
+        return 2 - [node.left, node.right].count(self.black_leaf)
+
     def draw_img(self, img_name='Red_Black_Tree.png'):
         """
-        画出树图
+        画图
+        用pygraphviz画出节点和箭头
+        箭头的红色和黑色分别代表左和右
         :param img_name:
         :return:
         """
+        if self.root is None:
+            return
+
         tree = pgv.AGraph(directed=True, strict=True)
 
         q = Queue()
@@ -242,11 +407,10 @@ class RedBlackTree:
             n = q.get()
             if n != self.black_leaf:  # 黑色叶子的连线由各个节点自己画
                 tree.add_node(n.val, color=n.color)
-                # ----- TEST
+                #  画父节点箭头
                 # if n.parent is not None:
-                    # print('child {} parent {}'.format(str(n.val), str(n.parent.val)))
-                    # tree.add_edge(n.val, n.parent.val)
-                # ------
+                #     tree.add_edge(n.val, n.parent.val)
+
                 for c in [n.left, n.right]:
                     q.put(c)
                     color = 'red' if c == n.left else 'black'
@@ -262,15 +426,24 @@ class RedBlackTree:
 
 
 if __name__ == '__main__':
-    # nums = [5, 3, 6, 7, 8]
-    # nums = list(range(1, 6))
-    nums = []
-    while len(nums) < 50:
-        n = random.randint(1, 200)
-        if n in nums:
-            continue
-        nums.append(n)
+    rbt = RedBlackTree()
 
-    rbt = RedBlackTree(nums)
+    # insert
+    nums = list(range(1, 25))
+    # random.shuffle(nums)
+    for num in nums:
+        rbt.insert(num)
+
+    # search
+    search_num = 23
+    n = rbt.search(search_num)
+    if n is not None:
+        print(n)
+    else:
+        print('node {} not found'.format(search_num))
+
+    # delete
+    rbt.delete(4)
+
+    # draw image
     rbt.draw_img('rbt.png')
-
