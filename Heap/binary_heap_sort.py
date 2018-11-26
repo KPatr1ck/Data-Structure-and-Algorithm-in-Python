@@ -37,6 +37,11 @@ class BinaryHeapSort(BinaryHeap):
 
 if __name__ == '__main__':
     bhs = BinaryHeapSort()
-    nums = [3, 5, 2, 6, 1]
+    nums = [3, 5, 2, 6, 1, 7, 6]
+
+    print('--- before sort ---')
+    print(nums)
+
     bhs.sort(nums)
+    print('--- after sort ---')
     print(nums)
