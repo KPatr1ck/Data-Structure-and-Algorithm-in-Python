@@ -9,6 +9,13 @@ class BinaryHeapSort(BinaryHeap):
         super(BinaryHeapSort, self).__init__()
 
     def sort(self, nums):
+        """
+        排序
+        1. 堆化，大顶堆
+        2. 排序，从后往前遍历，首尾元素互换，子数组堆化
+        :param nums:
+        :return:
+        """
         assert type(nums) is list
         length = len(nums)
 

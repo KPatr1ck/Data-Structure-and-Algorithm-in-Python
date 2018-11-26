@@ -6,6 +6,9 @@ import random
 
 
 class BinaryHeap:
+    """
+    大顶堆
+    """
     def __init__(self, data=None):
         self._data = []
         if type(data) is list:
@@ -16,9 +19,19 @@ class BinaryHeap:
         self._length = len(self._data)
 
     def heapify(self):
+        """
+        堆化
+        :return:
+        """
         self._heapify(self._data, self._length-1)
 
     def _heapify(self, data, tail_idx):
+        """
+        堆化内部实现
+        :param data: 需要堆化的数据
+        :param tail_idx: 尾元素的索引
+        :return:
+        """
         # heapify data[:tail_idx+1]
         if tail_idx <= 0:
             return
@@ -31,6 +44,13 @@ class BinaryHeap:
 
     @staticmethod
     def _heap_down(data, idx, tail_idx):
+        """
+        将指定的位置堆化
+        :param data: 需要堆化的数据
+        :param idx: data: 中需要堆化的位置
+        :param tail_idx: 尾元素的索引
+        :return:
+        """
         assert type(data) is list
 
         lp = (tail_idx - 1) // 2
@@ -53,11 +73,22 @@ class BinaryHeap:
                 break
 
     def insert(self, num):
+        """
+        插入
+        :param num:
+        :return:
+        """
         if self._insert(self._data, num):
             self._length += 1
 
     @staticmethod
     def _insert(data, num):
+        """
+        堆中插入元素的内部实现
+        :param data:
+        :param num:
+        :return:
+        """
         assert type(data) is list
         assert type(num) is int
 
@@ -78,11 +109,20 @@ class BinaryHeap:
         return True
 
     def delete_root(self):
+        """
+        删除根节点
+        :return:
+        """
         if self._delete_root(self._data):
             self._length -= 1
 
     @staticmethod
     def _delete_root(data):
+        """
+        删除根节点内部实现
+        :param data:
+        :return:
+        """
         assert type(data) is list
 
         length = len(data)
@@ -105,25 +145,25 @@ class BinaryHeap:
 
     @staticmethod
     def _draw_heap(data):
+        """
+        格式化打印
+        :param data:
+        :return:
+        """
         length = len(data)
 
         if length == 0:
             return 'empty heap'
 
-        layer_num = int(math.log(length, 2)) + 1
-        prt_nums = []
-
-        for i in range(layer_num):
-            prt_nums.append([])
-            for j in range(2**i):
-                idx = 2**i + j - 1
-                if idx > length - 1:
-                    break
-                prt_nums[i].append(data[idx])
-
         ret = ''
-        for l in prt_nums:
-            ret += str(l)[1:-1] + '\n'
+        for i, n in enumerate(data):
+            ret += str(n)
+            # 每行最后一个换行
+            if i == 2**int(math.log(i+1, 2)+1) - 2 or i == len(data) - 1:
+                ret += '\n'
+            else:
+                ret += ', '
+
         return ret
 
     def __repr__(self):
@@ -131,20 +171,24 @@ class BinaryHeap:
 
 
 if __name__ == '__main__':
-    nums = list(range(7))
-    random.shuffle(nums
-                   )
+    nums = list(range(10))
+    random.shuffle(nums)
+
     bh = BinaryHeap(nums)
+    print('--- before heapify ---')
     print(bh)
 
     # heapify
     bh.heapify()
+    print('--- after heapify ---')
     print(bh)
 
     # insert
-    bh.insert(100)
+    bh.insert(8)
+    print('--- insert ---')
     print(bh)
 
     # delete_root
     bh.delete_root()
+    print('--- delete root ---')
     print(bh)
