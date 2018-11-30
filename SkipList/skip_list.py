@@ -40,9 +40,9 @@ class SkipList:
         node = Node(data)
         node.forward = [None] * level
 
+        p = self.head
         # 在每一层找到合适的位置插入
         for i in range(level-1, -1, -1):
-            p = self.head
             while p.forward[i] and p.forward[i].data < data:
                 p = p.forward[i]
             node.forward[i], p.forward[i] = p.forward[i], node
