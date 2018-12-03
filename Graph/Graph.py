@@ -58,6 +58,13 @@ class Graph:
             self.add_edge(v1, v2)
 
     def bfs(self, s, t):
+        """
+        bfs 队列实现
+        注意更新访问表的时机，在入队时更新能避免非最短路径的问题
+        :param s:
+        :param t:
+        :return:
+        """
         assert type(s) is int and type(t) is int
         assert s < self._v and t < self._v
 
@@ -86,6 +93,12 @@ class Graph:
         return '[bfs] no path found of {} -> {}'.format(s, t)
 
     def dfs(self, s, t):
+        """
+        dfs 递归实现
+        :param s:
+        :param t:
+        :return:
+        """
         assert type(s) is int and type(t) is int
         assert s < self._v and t < self._v
 
@@ -113,10 +126,60 @@ class Graph:
                     _dfs(nb, target)
 
         _dfs(s, t)
-        return self._path(prev, s, t)
+        if is_found:
+            return self._path(prev, s, t)
+        else:
+            return '[bfs] no path found of {} -> {}'.format(s, t)
+
+    def dfs_stack(self, s, t):
+        """
+        dfs 栈实现
+        :param s:
+        :param t:
+        :return:
+        """
+        assert type(s) is int and type(t) is int
+        assert s < self._v and t < self._v
+
+        if s == t:
+            return str(s)
+
+        st = Stack(100)
+        visited = [False] * self._v
+        prev = [None] * self._v
+
+        st.push(s)
+        visited[s] = True
+        is_found = False
+
+        while not st.is_empty():
+            v = st.pop()
+            visited[v] = True
+            if v == t:
+                is_found = True
+                break
+            # 倒序入栈
+            for i in range(len(self._adj[v]) - 1, -1, -1):
+                nb = self._adj[v][i]
+                if not visited[nb]:
+                    prev[nb] = v
+                    st.push(nb)
+
+        if is_found:
+            return self._path(prev, s, t)
+        else:
+            return '[bfs_stack] no path found of {} -> {}'.format(s, t)
 
     @staticmethod
     def _path_r(mp, s, t):
+        """
+        递归找搜索路径
+        返回反向 t->s 的路径
+        :param mp:
+        :param s:
+        :param t:
+        :return:
+        """
         ret = [t]
         if s != t:
             ret.extend(Graph._path_r(mp, s, mp[t]))
@@ -124,12 +187,18 @@ class Graph:
 
     @staticmethod
     def _path(mp, s, t):
+        """
+        非递归找搜索路径
+        处理后返回正向路径 s->t
+        :param mp:
+        :param s:
+        :param t:
+        :return:
+        """
         ret = [t]
         while s != t:
             ret.append(mp[t])
             t = mp[t]
-            if t is None:
-                return 'no path found'
         ret.reverse()
         return ' -> '.join(map(str, ret))
 
@@ -152,3 +221,6 @@ if __name__ == '__main__':
 
     print('--- dfs ---')
     print(g.dfs(2, 5) + '\n')
+
+    print('--- dfs_stack ---')
+    print(g.dfs_stack(2, 5) + '\n')
