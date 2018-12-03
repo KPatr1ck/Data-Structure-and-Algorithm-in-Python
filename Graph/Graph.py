@@ -92,31 +92,6 @@ class Graph:
         if s == t:
             return str(s)
 
-        st = Stack(100)
-        visited = [False] * self._v
-        prev = [None] * self._v
-
-        visited[s] = True
-        st.push(s)
-        while not st.is_empty():
-            v = st.pop()
-            for nb in self._adj[v]:
-                if not visited[nb]:
-                    prev[nb] = v
-                    if nb == t:
-                        return self._path(prev, s, t)
-                    visited[nb] = True
-                    st.push(nb)
-
-        return '[dfs] no path found of {} -> {}'.format(s, t)
-
-    def dfs_r(self, s, t):
-        assert type(s) is int and type(t) is int
-        assert s < self._v and t < self._v
-
-        if s == t:
-            return str(s)
-
         visited = [False] * self._v
         prev = [None] * self._v
         visited[s] = True
@@ -124,7 +99,7 @@ class Graph:
         # 减少递归次数
         is_found = False
 
-        def _dfs_r(source, target):
+        def _dfs(source, target):
             nonlocal is_found
             for nb in self._adj[source]:
                 if is_found:
@@ -135,9 +110,9 @@ class Graph:
                         is_found = True
                         return
                     visited[nb] = True
-                    _dfs_r(nb, target)
+                    _dfs(nb, target)
 
-        _dfs_r(s, t)
+        _dfs(s, t)
         return self._path(prev, s, t)
 
     @staticmethod
@@ -166,7 +141,7 @@ class Graph:
 
 
 if __name__ == '__main__':
-    g = Graph(20)
+    g = Graph(15)
     g.random_edges()
     g.draw_graph()
     print('--- graph ---')
@@ -177,6 +152,3 @@ if __name__ == '__main__':
 
     print('--- dfs ---')
     print(g.dfs(2, 5) + '\n')
-
-    print('--- dfs_r ---')
-    print(g.dfs_r(2, 5) + '\n')
