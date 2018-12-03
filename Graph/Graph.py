@@ -6,7 +6,7 @@ import random
 from queue import Queue
 from Stack import Stack
 
-OUTPUT_PATH = 'E'
+OUTPUT_PATH = 'E:/'
 
 
 class Graph:
