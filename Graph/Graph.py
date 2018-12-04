@@ -186,6 +186,12 @@ class Graph:
         return ret
 
     @staticmethod
+    def _path_yield(mp, s, t):
+        if s != t:
+            yield from Graph._path_yield(mp, s, mp[t])
+        yield t
+
+    @staticmethod
     def _path(mp, s, t):
         """
         非递归找搜索路径
