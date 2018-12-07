@@ -14,10 +14,8 @@ def bf(main, pattern):
     n = len(main)
     m = len(pattern)
 
-    assert n >= m
-
-    if n == m:
-        return main == pattern
+    if n <= m:
+        return 0 if pattern == main else -1
 
     for i in range(n-m+1):
         for j in range(m):
@@ -28,7 +26,7 @@ def bf(main, pattern):
                     continue
             else:
                 break
-    return None
+    return -1
 
 
 def simple_hash(s, start, end):
@@ -52,7 +50,7 @@ def simple_hash(s, start, end):
         elif ord('a') <= ord(c) <= ord('z'):
             ret += ord(c) - ord('a')
         else:
-            raise Exception('This char {} is not supported'.format(c))
+            raise Exception('This char \'{}\' is not supported'.format(c))
     return ret
 
 
@@ -60,10 +58,8 @@ def rk(main, pattern):
     n = len(main)
     m = len(pattern)
 
-    assert n >= m
-
-    if n == m:
-        return pattern == main
+    if n <= m:
+        return 0 if pattern == main else -1
 
     # 子串哈希值表
     hash_memo = [None] * (n-m+1)
@@ -81,7 +77,7 @@ def rk(main, pattern):
                 return i
             else:
                 continue
-    return None
+    return -1
 
 
 if __name__ == '__main__':
@@ -90,11 +86,11 @@ if __name__ == '__main__':
 
     print('--- time consume ---')
     t = time()
-    print('result:', bf(m_str, p_str))
+    print('[bf] result:', bf(m_str, p_str))
     print('[bf] time cost: {0:.5}s'.format(time()-t))
 
     t = time()
-    print('result:', rk(m_str, p_str))
+    print('[rk] result:', rk(m_str, p_str))
     print('[rk] time cost: {0:.5}s'.format(time()-t))
 
     print('')
