@@ -64,6 +64,10 @@ def update_state(c, cur_state, state_map):
     2. 1不成立，从state_map[cur_state][1:] + c中，寻找可以返回之前状态的最长
        的后缀子串，如果找到，则返回对应状态
     3. 2中找不到任何后缀子串，回到状态0
+
+    需要优化的地方：
+    根据main的字符集合和m个状态，建立状态跳转表，维度为 len(set(main)) * m
+    状态表形成后，直接根据输入字符跳转即可
     :param c:
     :param cur_state:
     :param state_map:
