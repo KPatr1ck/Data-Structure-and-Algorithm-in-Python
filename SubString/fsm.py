@@ -9,8 +9,9 @@ def fsm(main, pattern):
     """
     有限状态机匹配：
     1. 根据pattern的长度，定义m+1个状态
-    2. 用指针i遍历main的字符，用s记录当前的匹配状态
-    3. 根据i和s，更新状态
+    2. 根据main, pattern建立状态转移表，大小为 m * len(set(main))
+    3. 用指针i遍历main的字符，用s记录当前的匹配状态
+    4. 根据i和s，更新状态(s也表示当前已匹配的长度)
     :param main:
     :param pattern:
     :return:
@@ -25,65 +26,70 @@ def fsm(main, pattern):
         return 0 if main == pattern else -1
 
     # state init
+    # state also stands for the how many characters have been matched
     s = 0
-    state_map = init_state(pattern, m)
+    state_switch_map = init_state(main, pattern, m)
 
-    for i in range(n):
-        s = update_state(main[i], s, state_map)
-        if s == m:
+    for i, c in enumerate(main):
+        s = update_state(c, s, state_switch_map)
+        if s == m:  # match all characters
             return i-m+1
     return -1
 
 
-def init_state(pattern, m):
+def update_state(c, cur_state, state_switch_map):
     """
-    根据pattern初始化state_map
-    state_map的长度是m+1，状态从0-m
-
-    示例：
-    pattern = 'abc'
-    state_map = ['', 'a', 'ab', 'abc']
-    :param pattern:
-    :return:
-    """
-    # state from 0 - m
-    state_map = [None] * (m+1)
-    for i in range(len(state_map)):
-        state_map[i] = pattern[:i]
-    # print('state_map for pattern: {}'.format(state_map))
-    return state_map
-
-
-def update_state(c, cur_state, state_map):
-    """
-    根据cur_state和输入c，计算最新的状态并返回
-    0是初始状态，m是匹配完成状态，主串中的字符是输入，状态根据输入跳转
-
-    跳转的情况如下：
-    1. state_map[cur_state] + c == state_map[cur_state] + 1，则状态加1
-    2. 1不成立，从state_map[cur_state][1:] + c中，寻找可以返回之前状态的最长
-       的后缀子串，如果找到，则返回对应状态
-    3. 2中找不到任何后缀子串，回到状态0
-
-    需要优化的地方：
-    根据main的字符集合和m个状态，建立状态跳转表，维度为 len(set(main)) * m
-    状态表形成后，直接根据输入字符跳转即可
+    根据当前状态cur_state和当前字符c，查表返回下一状态
     :param c:
     :param cur_state:
-    :param state_map:
+    :param state_switch_map:
     :return:
     """
-    if c == state_map[cur_state+1][-1]:     # match one char, so update s to s+1
-        return cur_state+1
-    else:
-        new_str = state_map[cur_state][1:] + c  # not match, try to find new s
-        length = len(new_str)                   # or length = cur_state
+    return state_switch_map[cur_state][ord(c)]
 
-        # find the max sub suffix from the state map
-        for i in range(length):
-            if new_str[i:] == state_map[length-i]:
-                return length-i
-        return 0
+
+def init_state(main, pattern, m):
+    """
+    根据main, pattern生成状态转移表state_switch_map
+    步骤：
+    1. 建立状态表state_map，目的是在建立转移表时，用后缀子串查哈希表，减少字符对比消耗
+    2. 初始化状态转移表state_switch_map，大小为 m * len(set(main))
+    *3. 给整张state_switch_map赋值，从状态0~m-1，对于每一个遇到的字符char，赋值新状态
+        state_switch_map[cur_state][char] = new_state
+    *4. 新状态new_state的赋值方法：当前状态cur_state表示在当前已经匹配了cur_state个字
+        符，对于新增的字符char，先让tmp = pattern[:cur_state] + char，然后从长到短遍
+        历所有后缀子串，如果有后缀子串suffix在state_map中出现，new_state则等于suffix
+        所对应的状态state_map[suffix]，如果遍历完了都不存在这个suffix，则新状态是0
+    :param main:
+    :param pattern:
+    :param m:
+    :return:
+    """
+    char_set = set(main)
+    # state_map: {'a': 1, 'ab': 2, 'abc': 3} (pattern = 'abc')
+    state_map = {}
+    for i in range(1, m+1):
+        state_map[pattern[:i]] = i
+
+    # state_switch_map: [{}, {}, ...]
+    state_switch_map = [None] * m
+    for i in range(m):
+        state_switch_map[i] = {}
+        for c in char_set:
+            state_switch_map[i][ord(c)] = 0
+
+    # build state_switch_map
+    for i in range(m):
+        matched = pattern[:i]
+        for c in char_set:
+            tmp = matched + c
+            for j in range(len(tmp)):
+                suffix = tmp[j:]
+                if suffix in state_map:
+                    state_switch_map[i][ord(c)] = state_map[suffix]
+                    break
+    # print(state_switch_map)
+    return state_switch_map
 
 
 if __name__ == '__main__':
@@ -99,7 +105,7 @@ if __name__ == '__main__':
     print('[fsm] result:', fsm(m_str, p_str))
     print('[fsm] time cost: {0:.5}s'.format(time() - t))
 
-    m_str = 'abcdcccdc'
+    m_str = 'abc../3 55dcccdc'
     p_str = 'cccd'
     print('')
     print('--- search ---')
