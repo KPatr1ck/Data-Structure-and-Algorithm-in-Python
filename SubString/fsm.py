@@ -10,8 +10,8 @@ def fsm(main, pattern):
     有限状态机匹配：
     1. 根据pattern的长度，定义m+1个状态
     2. 根据main, pattern建立状态转移表，大小为 m * len(set(main))
-    3. 用指针i遍历main的字符，用s记录当前的匹配状态
-    4. 根据i和s，更新状态(s也表示当前已匹配的长度)
+    3. 遍历main的字符，s记录当前的匹配状态
+    4. 根据字符c和状态s，更新状态(s也表示当前已匹配的长度)
     :param main:
     :param pattern:
     :return:
@@ -26,7 +26,7 @@ def fsm(main, pattern):
         return 0 if main == pattern else -1
 
     # state init
-    # state also stands for the how many characters have been matched
+    # state also stands for how many characters have been matched
     s = 0
     state_switch_map = init_state(main, pattern, m)
 
