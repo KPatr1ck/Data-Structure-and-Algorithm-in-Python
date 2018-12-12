@@ -5,7 +5,7 @@ from queue import Queue
 import pygraphviz as pgv
 import random
 
-OUTPUT_PATH = 'E:/'
+OUTPUT_PATH = 'C:/Users/gz1301/'
 
 
 class TreeNode:
@@ -406,7 +406,7 @@ class RedBlackTree:
         while not q.empty():
             n = q.get()
             if n != self.black_leaf:  # 黑色叶子的连线由各个节点自己画
-                tree.add_node(n.val, color=n.color)
+                tree.add_node(n.val, style='filled', fillcolor=n.color, fontcolor='white')
                 #  画父节点箭头
                 # if n.parent is not None:
                 #     tree.add_edge(n.val, n.parent.val)
@@ -433,6 +433,7 @@ if __name__ == '__main__':
     # random.shuffle(nums)
     for num in nums:
         rbt.insert(num)
+    rbt.draw_img('rbt.png')
 
     # search
     search_num = 23
@@ -446,4 +447,4 @@ if __name__ == '__main__':
     rbt.delete(4)
 
     # draw image
-    rbt.draw_img('rbt.png')
+    rbt.draw_img('rbt_after_delete.png')

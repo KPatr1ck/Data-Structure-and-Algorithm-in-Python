@@ -6,7 +6,7 @@ import random
 from queue import Queue
 from Stack import Stack
 
-OUTPUT_PATH = 'E:/'
+OUTPUT_PATH = 'C:/Users/gz1301/'
 
 
 class Graph:
@@ -36,10 +36,10 @@ class Graph:
             self._adj[t].append(s)
 
     def draw_graph(self, img_name='Graph.png'):
-        graph = pgv.AGraph('graph foo {}', strict=False, directed=False,rankdir='LR')
+        graph = pgv.AGraph('graph foo {}', strict=False, directed=False, rankdir='LR')
+        for v in range(self._v):
+            graph.add_node(v, style='filled', fillcolor='red', fontcolor='white')
         for vertex, neighbors in enumerate(self._adj):
-            if not graph.has_node(vertex):
-                graph.add_node(vertex)
             for n in neighbors:
                 if graph.has_edge(vertex, n) or graph.has_edge(n, vertex):
                     continue

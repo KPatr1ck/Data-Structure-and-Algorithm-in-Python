@@ -114,7 +114,6 @@ class Link:
             raise IndexError('Link has no nodes')
         return self.index(self.length - 1)
 
-
     def __repr__(self):
         if self.is_empty():
             return str(None)
