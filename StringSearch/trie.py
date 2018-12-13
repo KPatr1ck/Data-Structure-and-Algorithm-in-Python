@@ -87,19 +87,29 @@ class Trie:
     def gen_tree(self, string_list):
         """
         创建trie树
-
-        1. 遍历每个字符串的字符，从根节点开始，如果没有对应子节点，则创建
-        2. 每一个串的末尾节点标注为红色(is_ending_char)
         :param string_list:
         :return:
         """
         for string in string_list:
-            n = self.root
-            for c in string:
-                if n.get_child(c) is None:
-                    n.insert_child(c)
-                n = n.get_child(c)
-            n.is_ending_char = True
+            self.insert_string(string)
+
+    def insert_string(self, s):
+        """
+        插入字符串
+
+        1. 遍历每个字符串的字符，从根节点开始，如果没有对应子节点，则创建
+        2. 每一个串的末尾节点标注为红色(is_ending_char)
+        :param s:
+        :return:
+        """
+        assert type(s) is str and len(s) > 0
+
+        n = self.root
+        for c in s:
+            if n.get_child(c) is None:
+                n.insert_child(c)
+            n = n.get_child(c)
+        n.is_ending_char = True
 
     def search(self, pattern):
         """
@@ -120,6 +130,54 @@ class Trie:
             n = n.get_child(c)
 
         return True if n.is_ending_char is True else False
+
+    def prefix_search(self, prefix):
+        """
+        通过前缀搜索关键词
+        :param prefix:
+        :return:
+        """
+        ret = []
+        n = self.root
+
+        for c in prefix:
+            if n.get_child(c) is None:
+                return []
+            n = n.get_child(c)
+        for child in n.children:
+            for _ in self.dfs(child):
+                ret.append(prefix + _)
+        return ret
+
+    def dfs(self, node):
+        """
+        通过dfs搜索关键词1
+        :param node:
+        :return:
+        """
+        if len(node.children) == 0:
+            yield node.data
+        else:
+            for child in node.children:
+                if child.is_ending_char and len(child.children) > 0:
+                    yield node.data + child.data
+                for _ in self.dfs(child):
+                    yield node.data + _
+
+    def dfs1(self, node, prefix):
+        """
+        通过dfs搜索关键词2
+        :param node:
+        :param prefix:
+        :return:
+        """
+        if len(node.children) == 0:
+            yield prefix + node.data
+        else:
+            for c in node.children:
+                if c.is_ending_char and len(c.children) > 0:
+                    yield prefix + node.data + c.data
+                yield from self.dfs1(c, prefix + node.data)
 
     def draw_img(self, img_name='Trie.png'):
         """
@@ -163,8 +221,20 @@ if __name__ == '__main__':
     trie.gen_tree(string_list)
     trie.draw_img()
 
-    print('\n')
-    print('--- search result ---')
-    search_string = ['a', 'ab', 'abc', 'abcc', 'abe', 'P@trick', 'P@tric', 'Patrick']
+    print('\n--- search result ---')
+    search_string = ['a', 'ab', 'abc', 'abcc', 'abe', 'P@trick', 'P@tric', 'P@tricK']
     for ss in search_string:
         print('[pattern]: {}'.format(ss), '[result]: {}'.format(trie.search(ss)))
+
+    print('\n--- insert ---')
+    insert_string = 'P@tricK'
+    print('insert new string: {}'.format(insert_string))
+    trie.insert_string(insert_string)
+
+    print('\n--- search result after insertion ---')
+    trie.search(insert_string)
+    print('[pattern]: {}'.format(insert_string), '[result]: {}'.format(trie.search(insert_string)))
+
+    print('\n--- prefix search ---')
+    prefix = 'a'
+    print('[prefix]: {}'.format(prefix), '[result]: {}'.format(trie.prefix_search(prefix)))
