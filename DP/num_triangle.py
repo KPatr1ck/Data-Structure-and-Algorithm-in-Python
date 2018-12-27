@@ -19,7 +19,7 @@
 
 
 # DP解法，时间O(n2),空间O(n)
-def num_triangle(num_lsit):
+def num_triangle(num_list):
     """
     num_list: 二维的list
     """
