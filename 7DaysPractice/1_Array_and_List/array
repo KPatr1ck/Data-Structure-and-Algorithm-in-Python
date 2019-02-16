@@ -1,0 +1,182 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+from typing import TypeVar, Generic, List
+
+T = TypeVar('T')
+
+
+class Array1(Generic[T]):
+    """
+    实现一个支持动态扩容的数组
+    """
+    BASE_SIZE = 10
+
+    def __init__(self) -> None:
+        self.data: List[T] = [None for i in range(self.BASE_SIZE)]
+        self.size = self.BASE_SIZE
+        self.length = 0
+
+    def append(self, item: T) -> None:
+        if self.length >= self.size:    # 扩容
+            self.data.extend([None for i in range(self.size)])
+            self.size *= 2
+
+        self.data[self.length] = item
+        self.length += 1
+
+    def __repr__(self):
+        return str(self.data[:self.length])
+
+
+class Array2(Generic[T]):
+    """
+    实现一个大小固定的有序数组，支持动态增删改操作
+    """
+    def __init__(self, size: int) -> None:
+        self.data: List[T] = [None for i in range(size)]
+        self.size = size
+        self.length = 0
+
+    def _bsearch(self, item: T) -> int:
+        start, end = 0, self.length-1
+        while start <= end:
+            mid = (start + end)//2
+            if self.data[mid] < item:
+                start = mid + 1
+            elif self.data[mid] > item:
+                end = mid - 1
+            else:
+                return mid
+
+        return -1
+
+    def _bsearch_fl(self, item: T) -> int:
+        # first large
+        start, end = 0, self.length-1
+        while start <= end:
+            mid = (start + end)//2
+            if self.data[mid] <= item:
+                if mid == self.length-1 or self.data[mid+1] > item:
+                    return mid + 1
+                else:
+                    start = mid + 1
+            elif self.data[mid] > item:
+                end = mid - 1
+
+        # 如果所有都比item大，则插入的索引为0
+        return 0
+
+    def add(self, item: T) -> None:
+        if self.length >= self.size:
+            raise IndexError('out of range')
+
+        # 找到第一个大于item的数据的索引
+        idx = self._bsearch_fl(item)
+
+        for i in range(self.length-1, idx-1, -1):
+            self.data[i+1] = self.data[i]
+
+        self.data[idx] = item
+        self.length += 1
+
+    def delete(self, item: T, idx: int = None) -> bool:
+        if self.length <= 0:
+            raise IndexError('nothing to delete')
+
+        if idx is None:
+            idx = self._bsearch(item)
+
+        if idx == -1:   # 找不到
+            return False
+        else:
+            for i in range(idx, self.length-1):
+                self.data[i] = self.data[i+1]
+            self.length -= 1
+
+        return True
+
+    def modify(self, old: T, new: T) -> bool:
+        idx = self._bsearch(old)
+
+        if idx == -1:
+            # old does not exist in self.data
+            return False
+
+        self.delete(self.data[idx], idx)
+        self.add(new)
+
+    def __repr__(self):
+        return str(self.data[:self.length])
+
+
+def merge(a: Array2[int], b: Array2[int]) -> Array2[int]:
+    """
+    实现两个有序数组合并为一个有序数组
+    :param a:
+    :param b:
+    :return:
+    """
+    length = a.length + b.length
+    res: Array2 = Array2[int](length)
+
+    i, j = 0, 0
+    while i < a.length and j < b.length:
+        if a.data[i] <= b.data[j]:
+            res.add(a.data[i])
+            i += 1
+        else:
+            res.add(b.data[j])
+            j += 1
+
+    while i < a.length:
+        res.add(a.data[i])
+        i += 1
+
+    while j < b.length:
+        res.add(b.data[j])
+        j += 1
+
+    return res
+
+
+if __name__ == '__main__':
+    # 1
+    print('-' * 30)
+    print('[a1] append 0-15:')
+    a1: Array1 = Array1[int]()
+    for i in range(16):
+        a1.append(i)
+
+    print(a1)
+    print('length: {} size: {}\n'.format(a1.length, a1.size))
+
+    # 2
+    print('-' * 30)
+    print('[a2] append 10 random numbers:')
+    a2: Array2 = Array2[int](10)
+
+    import random
+    random.seed(0)
+    for i in range(10):
+        a2.add(random.randrange(0, 9))
+
+    print(a2)
+    print('delete 0:')
+    a2.delete(0)
+    print(a2, '\n')
+
+    print('-' * 30)
+    print('[a2] modify 5 to 9:')
+    a2.modify(5, 9)
+    print(a2, '\n')
+
+    # 3
+    print('-' * 30)
+    print('[merge] merge 2 sorted Array:')
+    a: Array2 = Array2[int](5)
+    b: Array2 = Array2[int](5)
+    for i in range(5):
+        a.add(2*i)
+        b.add(2*i+1)
+    print(a, b)
+    print(merge(a, b))
