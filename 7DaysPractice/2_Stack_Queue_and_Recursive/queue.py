@@ -42,7 +42,7 @@ class Queue(Generic[T]):
         return self.head == self.tail
 
     def __repr__(self) -> str:
-        return str(self.data[self.head: self.tail+1])
+        return str(self.data[self.head: self.tail])
 
 
 class QueueL(Generic[T]):
@@ -84,23 +84,43 @@ class QueueL(Generic[T]):
 
 class CycleQueue(Generic[T]):
     def __init__(self, size: int = 10) -> None:
-        self.data = [None for i in range(size)]
+        # 循环队列会浪费一个空间，所以是 size + 1
+        self.data = [None for i in range(size + 1)]
         self.size = size
         self.head = 0
         self.tail = self.head
 
     def enqueue(self, element: T) -> bool:
-        if ((self.tail + self.size) - self.head) % self.size:
-            pass
+        # if (self.head + self.size + 1 - self.tail) % self.size == 1:
+        if self.head - self.tail == 1 or self.head + self.size + 1 - self.tail == 1:
+            return False
+
+        self.data[self.tail] = element
+        self.tail += 1
+        self.tail %= self.size + 1
+        return True
 
     def dequeue(self) -> T:
-        pass
+        if self.is_empty():
+            raise Exception('The queue is empty')
+
+        ret = self.data[self.head]
+        self.head += 1
+        self.head %= self.size + 1
+        return ret
 
     def is_empty(self) -> bool:
         return self.head == self.tail
 
     def __repr__(self) -> str:
-        return str(self.data[self.head: self.tail+1])
+        ret = []
+        p = self.head
+        while p != self.tail:
+            ret.append(self.data[p])
+            p += 1
+            p %= self.size + 1
+
+        return str(ret) + ' ' + '( head: {}, tail: {} )'.format(self.head, self.tail)
 
 
 if __name__ == '__main__':
@@ -126,3 +146,14 @@ if __name__ == '__main__':
     print(q2)
     q2.enqueue(6)
     print(q2)
+
+    print('-'*30)
+    print('q3: cycle queue ')
+    q3: QueueL = CycleQueue[int](5)
+    for i in range(5):
+        q3.enqueue(i+1)
+    print(q3)
+    print(q3.dequeue())
+    print(q3)
+    q3.enqueue(6)
+    print(q3)
