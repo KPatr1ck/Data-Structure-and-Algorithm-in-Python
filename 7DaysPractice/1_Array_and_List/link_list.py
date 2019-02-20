@@ -45,10 +45,13 @@ class SingleLinkList(LinkList):
     """
     单向链表
     """
-    def __init__(self) -> None:
+    def __init__(self, capacity: int = 10) -> None:
         super(SingleLinkList, self).__init__()
+        self.capacity = capacity
 
     def append(self, data: int) -> None:
+        if self.length >= self.capacity:
+            raise Exception('the link list is full')
         node = Node(data)
         self.tail.next = node
         self.tail = node
@@ -63,6 +66,7 @@ class SingleLinkList(LinkList):
                 p_pre.next = p.next
                 if p == self.tail:
                     self.tail = p_pre
+                self.length -= 1
                 return True
             else:
                 p_pre = p_pre.next
@@ -81,6 +85,7 @@ class SingleLinkList(LinkList):
                 # 如果是尾部，需要更新尾部指针
                 if p == self.tail:
                     self.tail = p_pre
+                self.length -= 1
                 return True
             else:
                 p_pre = p_pre.next
