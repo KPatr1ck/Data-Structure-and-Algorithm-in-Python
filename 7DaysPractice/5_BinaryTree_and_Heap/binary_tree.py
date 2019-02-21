@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List, Generator
 from graphviz import Digraph
 from queue import Queue
 import random
@@ -140,6 +140,60 @@ class BinaryTree:
             elif n == n.parent.right:   # case 3: n是父节点的右节点
                 return n.parent
 
+    def pre_order(self) -> List:
+        ret = []
+        self._pre_order(self.root, ret)
+        return ret
+
+    def _pre_order(self, n: Node, l: List) -> None:
+        if n is None:
+            return
+
+        l.append(n.data)
+        self._pre_order(n.left, l)
+        self._pre_order(n.right, l)
+
+    def mid_order(self) -> List:
+        ret = []
+        self._mid_order(self.root, ret)
+        return ret
+
+    def _mid_order(self, n: Node, l: List) -> None:
+        if n is None:
+            return
+
+        self._mid_order(n.left, l)
+        l.append(n.data)
+        self._mid_order(n.right, l)
+
+    # def mid_order2(self) -> Generator[int, None, None]:
+    #     """
+    #     用生成器实现
+    #     :return:
+    #     """
+    #     return self._mid_order2(self.root)
+    #
+    # def _mid_order2(self, n: Node) -> Generator[int, None, None]:
+    #     if n is None:
+    #         return
+    #
+    #     yield from self._mid_order2(n.left)
+    #     yield n.data
+    #     yield from self._mid_order2(n.right)
+
+    def post_order(self) -> List:
+        ret = []
+        self._post_order(self.root, ret)
+        return ret
+
+    def _post_order(self, n: Node, l: List) -> None:
+        if n is None:
+            return
+
+        self._post_order(n.left, l)
+        self._post_order(n.right, l)
+        l.append(n.data)
+
     def plot(self) -> None:
         if self.root is None:
             print('This binary tree has no nodes')
@@ -167,7 +221,7 @@ class BinaryTree:
 
 if __name__ == '__main__':
     bt = BinaryTree()
-    l = [i for i in range(10)]
+    l = [i for i in range(8)]
     random.seed(0)
     random.shuffle(l)
 
@@ -175,5 +229,8 @@ if __name__ == '__main__':
         bt.insert(num)
     print(l)
 
-    bt.delete(5)
-    bt.plot()
+    print(bt.pre_order())
+    print(bt.mid_order())
+    print(bt.post_order())
+    # print(list(bt.mid_order2()))
+    # bt.plot()
