@@ -194,6 +194,25 @@ class BinaryTree:
         self._post_order(n.right, l)
         l.append(n.data)
 
+    def layer_order(self) -> List:
+        ret = []
+        self._layer_order(self.root, ret)
+        return ret
+
+    def _layer_order(self, n: Node, l: List) -> None:
+        if n is None:
+            return
+
+        q = Queue()
+        q.put(n)
+
+        while not q.empty():
+            node: Node = q.get()
+            l.append(node.data)
+            for c in [node.left, node.right]:
+                if c is not None:
+                    q.put(c)
+
     def plot(self) -> None:
         if self.root is None:
             print('This binary tree has no nodes')
@@ -232,5 +251,6 @@ if __name__ == '__main__':
     print(bt.pre_order())
     print(bt.mid_order())
     print(bt.post_order())
+    print(bt.layer_order())
     # print(list(bt.mid_order2()))
-    # bt.plot()
+    bt.plot()
